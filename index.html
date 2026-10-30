@@ -417,8 +417,10 @@ function afficherOuverts(){
 }
 const reponse = document.getElementById('reponse'), dossier = document.getElementById('dossier');
 async function consulter(code){
+  if (!(window.crypto && crypto.subtle)){ reponse.className = 'reponse non'; reponse.textContent = 'Les archives ne s’ouvrent qu’en connexion sécurisée. Rechargez la page en https://'; return; }
   reponse.className = 'reponse'; reponse.textContent = 'Vérification…';
-  const d = await ouvrir(code);
+  let d = null;
+  try{ d = await ouvrir(code); }catch(e){ d = null; }
   if (!d){ reponse.className = 'reponse non'; reponse.textContent = 'Aucun dossier ne correspond à ce code.'; return; }
   reponse.textContent = 'Accès accordé : ' + d.ref;
   dossier.innerHTML = '<p class="ref">' + d.ref + '</p>' + d.html;
