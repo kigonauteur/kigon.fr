@@ -167,7 +167,7 @@ a{color:var(--pourpre)}
   var journal = document.getElementById('journal'), form = document.getElementById('invite'), champ = document.getElementById('code');
   var bureau = document.getElementById('bureau'), feuille = document.getElementById('feuille');
   var calme = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var DOSSIERS = null, occupe = false, dernierFocus = null, actuel = null;
+  var DOSSIERS = null, occupe = false, dernierFocus = null, actuel = null, annonces = {}, caches = {};
 
   function attendre(ms){ return new Promise(function(r){ setTimeout(r, calme ? 0 : ms); }); }
   function ligne(cls, txt, vite){
@@ -243,6 +243,8 @@ a{color:var(--pourpre)}
 
   async function consulter(code, depuisHistorique){
     if (occupe) return; occupe = true;
+    var cle = norm(code);
+    if (caches[cle]){ afficher(caches[cle]); occupe = false; return; }
     if (!depuisHistorique) await ligne('moi', code.toUpperCase(), true);
     if (!(window.crypto && crypto.subtle)){
       await ligne('non', 'Connexion non sécurisée. Rechargez le terminal en https://'); occupe = false; return;
@@ -251,9 +253,13 @@ a{color:var(--pourpre)}
     var d = null; try { d = await ouvrir(code); } catch(e){ d = null; }
     await attendre(250);
     if (!d){ await ligne('non', 'Aucun dossier ne correspond à ce code.'); occupe = false; return; }
-    await ligne('ok', 'Dossier trouvé : <b>' + d.ref + '</b> · ' + (d.titre || ''));
-    await ligne('sys', d.support === 'cassette' ? 'Sortie de la bande et de sa transcription…' : 'Sortie du dossier…');
-    await attendre(350);
+    caches[cle] = d;
+    if (!annonces[d.ref]){
+      annonces[d.ref] = true;
+      await ligne('ok', 'Dossier trouvé : <b>' + d.ref + '</b> · ' + (d.titre || ''));
+      await ligne('sys', d.support === 'cassette' ? 'Sortie de la bande et de sa transcription…' : 'Sortie du dossier…');
+      await attendre(350);
+    }
     noter(norm(code), d.ref); historique(); afficher(d); occupe = false;
   }
 
