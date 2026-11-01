@@ -66,6 +66,19 @@ a{color:var(--pourpre)}
 .chemise .tete .conf{border:2px solid #7a1f3d;color:#7a1f3d;padding:2px 8px;transform:rotate(-4deg);font-weight:500;letter-spacing:.2em}
 .ranger{background:#3b2f1c;color:var(--papier);border:0;padding:9px 14px;min-height:44px;cursor:pointer;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
 .ranger:hover{background:#7a1f3d}
+.actions-dossier{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+@media print{
+  @page{size:A4;margin:16mm}
+  html,body{background:#fff!important}
+  .terminal,.onglet,.tete,.lecteur,.cassette{display:none!important}
+  .bureau{position:static!important;opacity:1!important;padding:0!important;background:none!important;overflow:visible!important}
+  .chemise{background:none!important;box-shadow:none!important;padding:0!important;margin:0!important;transform:none!important}
+  .feuille{box-shadow:none!important;padding:0!important;font-size:11pt!important;background:#fff!important}
+  .feuille::after{position:fixed;opacity:.05}
+  .feuille .cav{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .feuille .pied-pdf{display:block!important}
+}
+.feuille .pied-pdf{display:none;margin-top:28px;padding-top:8px;border-top:1px solid #bbb;font-size:9pt;color:#666;letter-spacing:.06em}
 
 /* La cassette */
 .cassette{margin:0 auto 18px;max-width:340px;aspect-ratio:1.58;background:#1d1b20;border-radius:10px;padding:14px 16px;box-shadow:inset 0 0 0 2px #2c2a31,0 6px 14px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:10px}
@@ -130,7 +143,10 @@ a{color:var(--pourpre)}
     <span class="onglet" id="onglet"></span>
     <div class="tete">
       <p class="conf">Confidentiel</p>
-      <button class="ranger" type="button" id="ranger">Ranger le dossier</button>
+      <div class="actions-dossier">
+        <button class="ranger" type="button" id="telecharger">Télécharger (PDF)</button>
+        <button class="ranger" type="button" id="ranger">Ranger le dossier</button>
+      </div>
     </div>
     <div id="bloc-cassette" hidden>
       <div class="cassette" id="cassette" aria-hidden="true">
@@ -151,7 +167,7 @@ a{color:var(--pourpre)}
   var journal = document.getElementById('journal'), form = document.getElementById('invite'), champ = document.getElementById('code');
   var bureau = document.getElementById('bureau'), feuille = document.getElementById('feuille');
   var calme = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var DOSSIERS = null, occupe = false, dernierFocus = null;
+  var DOSSIERS = null, occupe = false, dernierFocus = null, actuel = null;
 
   function attendre(ms){ return new Promise(function(r){ setTimeout(r, calme ? 0 : ms); }); }
   function ligne(cls, txt, vite){
@@ -204,7 +220,8 @@ a{color:var(--pourpre)}
       document.getElementById('cassette-titre').textContent = d.titre || '';
       document.getElementById('cassette-ref').textContent = 'Réf. ' + d.ref;
     }
-    feuille.innerHTML = '<p class="ref">Réf. ' + d.ref + (k7 ? ' · transcription' : '') + '</p>' + d.html;
+    feuille.innerHTML = '<p class="ref">Réf. ' + d.ref + (k7 ? ' · transcription' : '') + '</p>' + d.html + '<p class="pied-pdf">Archives d’Izanami · kigon.fr/archives · Seikatsu, Kigon · CC BY-NC-SA 4.0</p>';
+    actuel = d;
     var h = feuille.querySelector('h3'); if (h) h.id = 'titre-dossier';
     dernierFocus = document.activeElement;
     bureau.hidden = false; bureau.scrollTop = 0;
@@ -216,6 +233,12 @@ a{color:var(--pourpre)}
     setTimeout(function(){ bureau.hidden = true; (dernierFocus || champ).focus(); }, calme ? 0 : 300);
   }
   document.getElementById('ranger').addEventListener('click', ranger);
+  document.getElementById('telecharger').addEventListener('click', function(){
+    var t = document.title;
+    if (actuel) document.title = 'Archives Izanami ' + actuel.ref.replace(/[^\w-]+/g, ' ').trim();
+    window.print();
+    setTimeout(function(){ document.title = t; }, 500);
+  });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !bureau.hidden) ranger(); });
 
   async function consulter(code, depuisHistorique){
