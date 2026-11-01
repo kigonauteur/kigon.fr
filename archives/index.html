@@ -1,6 +1,253 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Archives d'Izanami</title><meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="0;url=/#archives"><script>location.replace('/#archives')</script>
-<style>body{background:#f4f1ec;color:#1c1a1f;font-family:Georgia,serif;padding:2rem}</style></head>
-<body><p><a href="/#archives">Entrer aux archives</a></p></body></html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Archives d'Izanami</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="Terminal de consultation de la salle des archives de l'école Izanami.">
+<meta name="theme-color" content="#08080b">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<style>
+:root{
+  --nuit:#08080b; --ecran:#0d0c11; --phosphore:#d9d4dc; --terne:#8d8796; --pourpre:#c4567a; --pourpre-sombre:#7a1f3d;
+  --kraft:#b89a6a; --kraft-sombre:#8f7347; --papier:#f2ede2; --encre:#1f1c22; --gris:#5a5560;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; --titre:"Shippori Mincho",Georgia,serif; --texte:"EB Garamond",Garamond,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--nuit);color:var(--phosphore)}
+body{font-family:var(--mono);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button,input{font:inherit}
+a{color:var(--pourpre)}
+:focus-visible{outline:2px solid var(--pourpre);outline-offset:3px}
+
+/* ——— Le terminal ——— */
+.terminal{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;max-width:46rem;margin:0 auto;padding:28px 16px 24px;position:relative}
+.terminal::before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(255,255,255,.025) 0 1px,transparent 1px 3px);z-index:3}
+.entete{display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:1px solid #2a2830}
+.entete svg{width:46px;height:46px;flex:none;color:var(--pourpre)}
+.entete p{margin:0;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--terne)}
+.entete strong{display:block;font-family:var(--titre);font-weight:800;font-size:22px;letter-spacing:.02em;text-transform:none;color:var(--phosphore)}
+.journal{flex:1;padding:18px 0 8px}
+.journal p{margin:0 0 6px;white-space:pre-wrap;word-break:break-word}
+.journal .sys{color:var(--terne)}
+.journal .ok{color:var(--phosphore)}
+.journal .ok b{color:var(--pourpre);font-weight:500}
+.journal .non{color:#e07a8f}
+.journal .moi{color:var(--phosphore)}
+.journal .moi::before{content:"> ";color:var(--pourpre)}
+.invite{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px dashed #2a2830}
+.invite label{color:var(--pourpre);white-space:nowrap;letter-spacing:.06em}
+.invite input{flex:1;min-width:0;background:transparent;border:0;border-bottom:1px solid #3a3842;color:var(--phosphore);padding:6px 2px;caret-color:var(--pourpre);letter-spacing:.12em;text-transform:uppercase}
+.invite input::placeholder{color:#4b4852;text-transform:none;letter-spacing:.04em}
+.invite button{background:transparent;border:1px solid var(--pourpre);color:var(--pourpre);padding:7px 14px;min-height:44px;cursor:pointer;letter-spacing:.1em;text-transform:uppercase;font-size:12px}
+.invite button:hover{background:var(--pourpre);color:var(--nuit)}
+.historique{margin-top:14px;font-size:13px;color:var(--terne)}
+.historique[hidden]{display:none}
+.historique ul{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.historique button{background:#16151b;border:1px solid #2e2c35;color:var(--phosphore);padding:8px 10px;min-height:40px;cursor:pointer;font-size:12px;letter-spacing:.08em}
+.historique button:hover{border-color:var(--pourpre)}
+.pied{display:flex;justify-content:space-between;gap:12px;margin-top:22px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#55525c}
+.pied a{color:#6c6874;text-decoration:none}
+.pied a:hover{color:var(--pourpre)}
+.curseur{display:inline-block;width:.6em;height:1.05em;background:var(--pourpre);vertical-align:-2px;animation:clignote 1s steps(1) infinite}
+@keyframes clignote{50%{opacity:0}}
+
+/* ——— Le bureau et le dossier ——— */
+.bureau{position:fixed;inset:0;z-index:5;background:radial-gradient(ellipse at 50% 30%,#2a2420 0%,#16120f 70%);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:28px 12px 60px;opacity:0;transition:opacity .35s}
+.bureau.ouvert{opacity:1}
+.bureau[hidden]{display:none}
+.chemise{position:relative;max-width:44rem;margin:26px auto 0;background:var(--kraft);border-radius:2px 6px 6px 6px;padding:22px 16px 26px;box-shadow:0 18px 40px rgba(0,0,0,.55);transform:translateY(24px);transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.bureau.ouvert .chemise{transform:none}
+.onglet{position:absolute;top:-26px;left:0;background:var(--kraft);padding:5px 16px 4px;border-radius:6px 6px 0 0;font-size:12px;letter-spacing:.14em;color:#3b2f1c;text-transform:uppercase}
+.chemise .tete{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin:0 6px 16px;color:#3b2f1c}
+.chemise .tete p{margin:0;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.chemise .tete .conf{border:2px solid #7a1f3d;color:#7a1f3d;padding:2px 8px;transform:rotate(-4deg);font-weight:500;letter-spacing:.2em}
+.ranger{background:#3b2f1c;color:var(--papier);border:0;padding:9px 14px;min-height:44px;cursor:pointer;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.ranger:hover{background:#7a1f3d}
+
+/* La cassette */
+.cassette{margin:0 auto 18px;max-width:340px;aspect-ratio:1.58;background:#1d1b20;border-radius:10px;padding:14px 16px;box-shadow:inset 0 0 0 2px #2c2a31,0 6px 14px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:10px}
+.cassette .etiq{background:#efe6cf;border-radius:3px;padding:6px 10px;color:#2a2520;font-size:11px;letter-spacing:.06em;line-height:1.35}
+.cassette .etiq b{display:block;font-family:var(--titre);font-weight:800;font-size:15px;letter-spacing:0}
+.cassette .fenetre{flex:1;background:#0f0e12;border-radius:20px;display:flex;align-items:center;justify-content:space-around;padding:0 22px;box-shadow:inset 0 0 0 2px #2c2a31}
+.bobine{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,#0f0e12 0 5px,#d9d4dc 6px 8px,#3a3842 9px 100%);position:relative}
+.bobine::after{content:"";position:absolute;inset:6px;border-radius:50%;border:2px dashed #0f0e12}
+.cassette.tourne .bobine{animation:tourne 2.4s linear infinite}
+@keyframes tourne{to{transform:rotate(360deg)}}
+.lecteur{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:18px;color:#3b2f1c;font-size:12px;letter-spacing:.08em}
+.lecteur button{background:#1d1b20;color:var(--papier);border:0;border-radius:50%;width:44px;height:44px;cursor:pointer;display:grid;place-items:center}
+.lecteur button[disabled]{opacity:.45;cursor:not-allowed}
+
+/* La feuille */
+.feuille{position:relative;background:var(--papier);color:var(--encre);padding:34px 22px 40px;box-shadow:0 2px 0 #e3dccd,0 4px 0 #d8d0bf,0 10px 24px rgba(0,0,0,.25);font-family:var(--mono);font-size:14px;line-height:1.65;overflow:hidden}
+.feuille::after{content:"";position:absolute;right:-60px;bottom:-60px;width:280px;height:280px;background:url("/sceau-512.png") center/contain no-repeat;opacity:.06;pointer-events:none}
+.feuille .ref{margin:0 0 14px;font-size:11px;letter-spacing:.16em;color:var(--gris);text-transform:uppercase}
+.feuille h3{font-family:var(--titre);font-weight:800;font-size:22px;line-height:1.25;margin:6px 0 16px;letter-spacing:.01em}
+.feuille h4{font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin:22px 0 8px;color:var(--pourpre-sombre)}
+.feuille p{margin:0 0 10px}
+.feuille ul{margin:0 0 10px;padding-left:20px}
+.feuille .doc-entete{font-size:11px;letter-spacing:.1em;color:var(--gris);text-transform:uppercase}
+.feuille .chrono{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 10px}
+.feuille .chrono dt{color:var(--pourpre-sombre);font-weight:500;white-space:nowrap}
+.feuille .chrono dd{margin:0}
+.feuille .cav{background:var(--encre);color:var(--encre);letter-spacing:-.05em;user-select:none}
+.feuille .visa{font-style:italic;color:var(--gris);margin-top:18px}
+.feuille .marge{font-family:var(--texte);font-style:italic;font-size:17px;color:#2b4a8a;transform:rotate(-2deg);margin:18px 0 0 18px}
+.feuille .tampon{display:inline-block;margin-top:18px;border:3px double var(--pourpre-sombre);color:var(--pourpre-sombre);padding:4px 14px;text-transform:uppercase;letter-spacing:.24em;font-weight:500;transform:rotate(-6deg);opacity:.85}
+@media (min-width:640px){.chemise{padding:26px 28px 32px}.feuille{padding:46px 52px 54px;font-size:14.5px}}
+@media (max-width:480px){.feuille .chrono{grid-template-columns:1fr}.feuille .chrono dt{margin-top:6px}}
+@media (prefers-reduced-motion:reduce){.curseur,.cassette.tourne .bobine{animation:none}.bureau,.chemise{transition:none}}
+</style>
+</head>
+<body>
+
+<main class="terminal" aria-labelledby="t-archives">
+  <header class="entete">
+    <svg aria-hidden="true" viewBox="0 0 200 200"><defs><clipPath id="k"><circle cx="100" cy="100" r="88"/></clipPath></defs><g clip-path="url(#k)"><g transform="rotate(40 100 100)" fill="currentColor"><rect x="96.5" y="-20" width="7" height="86" rx="3"/><rect x="92" y="66" width="16" height="8" rx="3"/><rect x="94" y="76" width="12" height="5" rx="2"/><path d="M100 81 L107 96 L100 140 L93 96 Z"/><path d="M107 71 q9 3 9 13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M112 83 l8 0 l2 12 l-12 0 Z"/></g><g transform="translate(62,64) scale(0.95,0.95)" fill="none" stroke="currentColor" stroke-width="5.26" stroke-linecap="round"><path d="M-28 8 L28 8 M-20 8 A10 10 0 0 1 -5 -4 A12 12 0 0 1 18 -2 A9 9 0 0 1 26 8"/><path d="M-5 -4 a6 6 0 1 1 8 6"/></g><path fill="currentColor" transform="translate(58,152) scale(0.75)" d="M0 -12 C5 -5 8 -1 8 3 A8 8 0 0 1 -8 3 C-8 -1 -5 -5 0 -12 Z"/><path d="M10 174 Q30 162 50 174 T90 174 T130 174 T170 174 T210 174" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></g><circle cx="100" cy="100" r="92" fill="none" stroke="currentColor" stroke-width="10"/></svg>
+    <p>École Izanami · Salle des archives<strong id="t-archives">Terminal de consultation</strong></p>
+  </header>
+
+  <div class="journal" id="journal" role="log" aria-live="polite"></div>
+
+  <form class="invite" id="invite" autocomplete="off">
+    <label for="code">Code&nbsp;:</label>
+    <input id="code" name="code" spellcheck="false" autocapitalize="off" placeholder="saisissez le code du dossier" required>
+    <button type="submit">Consulter</button>
+  </form>
+
+  <div class="historique" id="historique" hidden>
+    <span>Historique de consultation sur ce poste</span>
+    <ul id="liste-historique"></ul>
+  </div>
+
+  <footer class="pied"><span>Poste n° 3 · Pour la cause</span><a href="/">Quitter les archives</a></footer>
+</main>
+
+<div class="bureau" id="bureau" hidden role="dialog" aria-modal="true" aria-labelledby="titre-dossier">
+  <div class="chemise">
+    <span class="onglet" id="onglet"></span>
+    <div class="tete">
+      <p class="conf">Confidentiel</p>
+      <button class="ranger" type="button" id="ranger">Ranger le dossier</button>
+    </div>
+    <div id="bloc-cassette" hidden>
+      <div class="cassette" id="cassette" aria-hidden="true">
+        <div class="etiq"><b id="cassette-titre"></b><span id="cassette-ref"></span></div>
+        <div class="fenetre"><span class="bobine"></span><span class="bobine"></span></div>
+      </div>
+      <div class="lecteur">
+        <button type="button" id="lecture" disabled aria-label="Écouter l'enregistrement"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2 L13 8 L4 14 Z" fill="currentColor"/></svg></button>
+        <span id="etat-lecture">Bande en cours de numérisation</span>
+      </div>
+    </div>
+    <article class="feuille" id="feuille" aria-labelledby="titre-dossier"></article>
+  </div>
+</div>
+
+<script>
+(function(){
+  var journal = document.getElementById('journal'), form = document.getElementById('invite'), champ = document.getElementById('code');
+  var bureau = document.getElementById('bureau'), feuille = document.getElementById('feuille');
+  var calme = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var DOSSIERS = null, occupe = false, dernierFocus = null;
+
+  function attendre(ms){ return new Promise(function(r){ setTimeout(r, calme ? 0 : ms); }); }
+  function ligne(cls, txt, vite){
+    var p = document.createElement('p'); p.className = cls; journal.appendChild(p);
+    if (calme || vite){ p.innerHTML = txt; journal.scrollIntoView(false); return Promise.resolve(); }
+    var brut = txt.replace(/<[^>]+>/g, ''), i = 0;
+    return new Promise(function(r){
+      (function pas(){
+        i += 2; p.textContent = brut.slice(0, i);
+        if (i < brut.length) setTimeout(pas, 14); else { p.innerHTML = txt; r(); }
+      })();
+    });
+  }
+  function lire(k){ try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch(e){ return []; } }
+  function ecrire(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+  var norm = function(s){ return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, ''); };
+  var b64 = function(s){ return Uint8Array.from(atob(s), function(c){ return c.charCodeAt(0); }); };
+
+  async function ouvrir(code){
+    var base = await crypto.subtle.importKey('raw', new TextEncoder().encode(norm(code)), 'PBKDF2', false, ['deriveKey']);
+    for (var j = 0; j < DOSSIERS.d.length; j++){
+      var d = DOSSIERS.d[j];
+      try {
+        var cle = await crypto.subtle.deriveKey({name:'PBKDF2', salt:b64(d.s), iterations:DOSSIERS.iter, hash:'SHA-256'}, base, {name:'AES-GCM', length:256}, false, ['decrypt']);
+        var clair = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64(d.i)}, cle, b64(d.c));
+        return JSON.parse(new TextDecoder().decode(clair));
+      } catch(e) {}
+    }
+    return null;
+  }
+
+  function historique(){
+    var l = lire('archives-ouverts'), ul = document.getElementById('liste-historique');
+    document.getElementById('historique').hidden = !l.length; ul.innerHTML = '';
+    l.forEach(function(x){
+      var li = document.createElement('li'), b = document.createElement('button');
+      b.type = 'button'; b.textContent = x.ref; b.addEventListener('click', function(){ consulter(x.code, true); });
+      li.appendChild(b); ul.appendChild(li);
+    });
+  }
+  function noter(code, ref){
+    var l = lire('archives-ouverts').filter(function(x){ return x.code !== code; }); l.push({code:code, ref:ref}); ecrire('archives-ouverts', l);
+  }
+
+  function afficher(d){
+    document.getElementById('onglet').textContent = d.ref;
+    var k7 = d.support === 'cassette';
+    document.getElementById('bloc-cassette').hidden = !k7;
+    if (k7){
+      document.getElementById('cassette-titre').textContent = d.titre || '';
+      document.getElementById('cassette-ref').textContent = 'Réf. ' + d.ref;
+    }
+    feuille.innerHTML = '<p class="ref">Réf. ' + d.ref + (k7 ? ' · transcription' : '') + '</p>' + d.html;
+    var h = feuille.querySelector('h3'); if (h) h.id = 'titre-dossier';
+    dernierFocus = document.activeElement;
+    bureau.hidden = false; bureau.scrollTop = 0;
+    requestAnimationFrame(function(){ bureau.classList.add('ouvert'); });
+    document.getElementById('ranger').focus();
+  }
+  function ranger(){
+    bureau.classList.remove('ouvert');
+    setTimeout(function(){ bureau.hidden = true; (dernierFocus || champ).focus(); }, calme ? 0 : 300);
+  }
+  document.getElementById('ranger').addEventListener('click', ranger);
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !bureau.hidden) ranger(); });
+
+  async function consulter(code, depuisHistorique){
+    if (occupe) return; occupe = true;
+    if (!depuisHistorique) await ligne('moi', code.toUpperCase(), true);
+    if (!(window.crypto && crypto.subtle)){
+      await ligne('non', 'Connexion non sécurisée. Rechargez le terminal en https://'); occupe = false; return;
+    }
+    await ligne('sys', 'Recherche dans les registres…');
+    var d = null; try { d = await ouvrir(code); } catch(e){ d = null; }
+    await attendre(250);
+    if (!d){ await ligne('non', 'Aucun dossier ne correspond à ce code.'); occupe = false; return; }
+    await ligne('ok', 'Dossier trouvé : <b>' + d.ref + '</b> · ' + (d.titre || ''));
+    await ligne('sys', d.support === 'cassette' ? 'Sortie de la bande et de sa transcription…' : 'Sortie du dossier…');
+    await attendre(350);
+    noter(norm(code), d.ref); historique(); afficher(d); occupe = false;
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault(); var v = champ.value; if (!norm(v)) return; champ.value = ''; consulter(v, false);
+  });
+
+  (async function demarrer(){
+    historique();
+    try { DOSSIERS = await (await fetch('dossiers.json', {cache:'no-cache'})).json(); }
+    catch(e){ await ligne('non', 'Registres indisponibles. Réessayez plus tard.', true); return; }
+    await ligne('sys', 'Connexion au réseau de l’école… établie.');
+    await ligne('sys', 'Salle des archives. Tous les rapports de l’école sont consultables.');
+    await ligne('sys', 'Encore faut-il en connaître le code.');
+    champ.focus({preventScroll:true});
+  })();
+})();
+</script>
+</body>
+</html>
