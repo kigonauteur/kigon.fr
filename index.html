@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Seikatsu, de Kigon</title>
+<meta name="description" content="Seikatsu, saga de Kigon : l'orphelinat Izanami, au pays Soleil. Lecture libre, versions papier et Archives d'Izanami.">
+<link rel="stylesheet" href="/fonts.css">
+<style>
+/* Mise en page : une seule colonne de lecture, comme une page de livre ; la brume des nuages en fond, le pourpre des bannières de l'école en accent, le sceau comme seul ornement. */
+:root{
+  --brume:#e9ebee; --papier:#f6f6f4; --encre:#1d1b24; --gris:#5d5966; --filet:#cfd1d8;
+  --pourpre:#7a1f3d; --pourpre-doux:#7a1f3d1a; --jade:#3f6b5a;
+  --f-titre:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",Georgia,serif;
+  --f-texte:"EB Garamond",Garamond,"Times New Roman",serif;
+  --f-code:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --mesure:36rem;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --brume:#15141b; --papier:#1d1c25; --encre:#ebe7ee; --gris:#a7a2b0; --filet:#34323f;
+  --pourpre:#d4708f; --pourpre-doux:#d4708f22; --jade:#8fc2ad; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --brume:#15141b; --papier:#1d1c25; --encre:#ebe7ee; --gris:#a7a2b0; --filet:#34323f;
+  --pourpre:#d4708f; --pourpre-doux:#d4708f22; --jade:#8fc2ad; color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{background:var(--brume);color:var(--encre);font-family:var(--f-texte);font-size:1.15rem;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--brume)}
+a{color:var(--pourpre);text-underline-offset:.18em}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--pourpre);outline-offset:3px}
+.page{max-width:58rem;margin:0 auto}
+header.barre{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--brume);display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-block:.9rem;border-bottom:1px solid var(--filet)}
+.marque{display:flex;align-items:center;gap:.6rem;text-decoration:none;color:var(--encre);font-family:var(--f-titre);font-weight:700;letter-spacing:.04em}
+.marque svg{width:30px;height:30px;color:var(--pourpre)}
+nav ul{list-style:none;display:flex;flex-wrap:wrap;gap:.2rem 1.2rem;margin:0;padding:0;font-size:1rem}
+nav a{color:var(--gris);text-decoration:none}
+nav a:hover{color:var(--pourpre)}
+h1,h2,h3{font-family:var(--f-titre);text-wrap:balance;line-height:1.2;margin:0}
+h2{font-size:clamp(1.6rem,4vw,2.2rem);font-weight:700}
+.etiquette{font-family:var(--f-code);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--pourpre)}
+section{padding-block:3.5rem;border-bottom:1px solid var(--filet);display:grid;gap:1.4rem}
+section:last-of-type{border-bottom:0}
+p{margin:0;max-width:var(--mesure)}
+/* Accueil */
+.ouverture{display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start;padding-block:4rem 3rem}
+.ouverture h1{font-size:clamp(3.2rem,11vw,6.5rem);font-weight:800;letter-spacing:.02em;line-height:1}
+.ouverture .auteur{font-family:var(--f-titre);font-size:1.25rem;color:var(--gris);margin-top:.6rem}
+.ouverture .accroche{font-size:1.3rem;margin-top:1.8rem}
+.kanji{writing-mode:vertical-rl;font-family:var(--f-titre);font-weight:800;font-size:clamp(4rem,12vw,8rem);line-height:1;color:var(--pourpre);opacity:.9;user-select:none;display:flex;flex-direction:column;align-items:center;gap:1.2rem}
+.kanji svg{writing-mode:horizontal-tb;width:clamp(56px,9vw,84px);height:auto;color:var(--pourpre)}
+.actions{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:2rem}
+.bouton{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--f-texte);font-size:1.05rem;padding:.6rem 1.2rem;border:1.5px solid var(--pourpre);border-radius:2px;background:var(--pourpre);color:var(--papier);text-decoration:none;cursor:pointer}
+.bouton.creux{background:transparent;color:var(--pourpre)}
+.bouton[aria-disabled="true"]{opacity:.55;cursor:default}
+.classes{display:flex;flex-wrap:wrap;gap:.4rem 1.4rem;font-family:var(--f-titre);font-size:1rem;color:var(--gris);padding-block:1.2rem;border-block:1px solid var(--filet);list-style:none;margin:0;padding-inline:0}
+.classes button{font:inherit;color:inherit;background:none;border:0;padding:.15rem 0;cursor:pointer;border-bottom:1px solid transparent}
+.classes button:hover,.classes button[aria-expanded="true"]{color:var(--pourpre);border-bottom-color:var(--pourpre)}
+.classes button::before{content:"";display:inline-block;width:.45em;height:.45em;background:var(--pourpre);transform:rotate(45deg);margin-right:.55em;vertical-align:.12em}
+.bloc-classes{padding-block:3.5rem 0;display:grid;gap:1.2rem}
+.perso-tete{display:grid;gap:.6rem}
+.fiches{padding-block:1.6rem 2rem;display:grid;gap:1rem;border-bottom:1px solid var(--filet)}
+.fiches .entete{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.4rem 1rem}
+.fiches h2{font-size:1.6rem}
+.fiches .fermer{font-family:var(--f-texte);font-size:.95rem;background:none;border:1px solid var(--filet);color:var(--encre);padding:.25rem .7rem;cursor:pointer;border-radius:2px}
+.fiches .role-classe{color:var(--gris)}
+.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(16rem,1fr));gap:1rem}
+.fiche{background:var(--papier);border:1px solid var(--filet);padding:1rem 1.1rem;display:grid;gap:.35rem;align-content:start;min-width:0}
+.fiche.reine{border-color:var(--pourpre)}
+.fiche h3{font-size:1.15rem}
+.fiche .qui{font-family:var(--f-code);font-size:.72rem;letter-spacing:.06em;color:var(--pourpre);text-transform:uppercase}
+.fiche p{font-size:1rem}
+.fiche .age{font-family:var(--f-titre);font-size:1rem;color:var(--encre)}
+.fiche .age span{color:var(--gris);font-size:.9rem}
+.spoil{border-top:1px solid var(--filet);padding-top:.5rem;display:grid;gap:.45rem}
+.spoil-tete{font-family:var(--f-code);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--encre)}
+.spoil-tete .consigne{display:block;margin:.3rem 0 0;color:var(--encre);font-style:normal}
+.spoil-tete .alerte{display:inline-block;margin-top:.3rem;background:var(--pourpre);color:var(--papier);font-family:var(--f-code);font-weight:500;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .55rem;border-radius:2px}
+.spoil-tete span{color:var(--pourpre);margin-left:.3rem;text-transform:none;letter-spacing:0;font-family:var(--f-texte);font-size:.95rem;font-style:italic}
+.pastilles{display:flex;gap:.5rem}
+.pastille{width:2rem;height:2rem;border-radius:50%;border:2px solid var(--encre);background:none;color:var(--encre);font-family:var(--f-code);font-size:.85rem;cursor:pointer;display:grid;place-items:center}
+.pastille:hover{border-color:var(--pourpre);color:var(--pourpre)}
+.pastille[aria-pressed="true"]{background:var(--pourpre);border-color:var(--pourpre);color:var(--papier)}
+.spoil-texte{display:grid;gap:.35rem;border-left:2px solid var(--pourpre);padding-left:.6rem}
+.spoil-texte p{font-size:.98rem}
+.spoil-legende{font-family:var(--f-code);font-size:.72rem!important;color:var(--gris)}
+.revel{border-top:1px solid var(--filet);padding-top:.5rem}
+.revel summary{cursor:pointer;font-family:var(--f-code);font-size:.75rem;color:var(--gris);display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;list-style:none}
+.revel summary::-webkit-details-marker{display:none}
+.revel summary::before{content:"▸";color:var(--pourpre)}
+.revel[open] summary::before{content:"▾"}
+.revel .alerte{background:var(--pourpre);color:var(--papier);font-weight:500;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;padding:.15rem .45rem;border-radius:2px}
+.revel .spoil-texte{margin-top:.5rem}
+.fiche .tomeb{font-family:var(--f-code);font-size:.7rem;color:var(--gris)}
+.fiches .vide{color:var(--gris);font-style:italic}
+.fiches .note{font-size:.95rem;color:var(--gris)}
+/* Tomes */
+.tomes{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1.2rem}
+.tome{background:var(--papier);border:1px solid var(--filet);padding:1.4rem 1.4rem 1.2rem;display:grid;grid-template-rows:auto auto auto 1fr auto;gap:.7rem;min-width:0}
+.tome .meta{align-self:end}
+.tome .num{font-family:var(--f-titre);font-weight:800;font-size:2.6rem;color:var(--pourpre);line-height:1}
+.tome h3{font-size:1.25rem}
+.tome p{font-size:1.05rem}
+.tome .exergue{font-style:italic;color:var(--gris);border-left:2px solid var(--pourpre);padding-left:.8rem}
+.tome .meta{font-family:var(--f-code);font-size:.75rem;color:var(--gris);display:flex;justify-content:space-between;gap:.6rem;border-top:1px solid var(--filet);padding-top:.7rem;font-variant-numeric:tabular-nums}
+/* Formats */
+.formats{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:1rem 2rem;margin:0}
+.formats div{min-width:0;display:grid;gap:.25rem}
+.formats dt{font-family:var(--f-titre);font-weight:700}
+.formats dd{margin:0;color:var(--gris);font-size:1.05rem}
+.epubs{display:grid;gap:.35rem}
+.epubs a{font-size:1.05rem}
+.formats .bouton{margin-top:.4rem}
+.statut{display:inline-block;font-family:var(--f-code);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--jade);border:1px solid currentColor;padding:.1rem .45rem;border-radius:2px}
+.licence{font-size:1rem;color:var(--gris)}
+/* Contact */
+.contact{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem}
+.contact code{font-family:var(--f-code);font-size:1rem;background:var(--papier);border:1px solid var(--filet);padding:.35rem .6rem;user-select:all}
+.petit-bouton{font-family:var(--f-texte);font-size:.95rem;background:none;border:1px solid var(--filet);color:var(--encre);padding:.3rem .7rem;cursor:pointer;border-radius:2px}
+.reponse{font-family:var(--f-code);font-size:.9rem;min-height:1.4em;color:var(--gris)}
+footer{padding-block:2rem 3rem;font-size:.95rem;color:var(--gris);display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem;border-top:1px solid var(--filet)}
+/* Archives */
+@media (max-width:40rem){.ouverture{grid-template-columns:1fr}.kanji{writing-mode:horizontal-tb;flex-direction:row;font-size:3.4rem;order:-1}.chrono{grid-template-columns:1fr}.chrono dt{padding-top:.6rem}}
+</style>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:title" content="Seikatsu, de Kigon">
+<meta property="og:description" content="L'orphelinat Izanami, au pays Soleil. Une saga en lecture libre.">
+<meta property="og:image" content="https://kigon.fr/sceau-512.png">
+<meta property="og:url" content="https://kigon.fr/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+</head>
+<body>
+<div class="page">
+<header class="barre">
+  <a class="marque" href="#accueil" aria-label="Seikatsu, accueil"><svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><clipPath id="k0"><circle cx="100" cy="100" r="88"/></clipPath></defs><g clip-path="url(#k0)"><g transform="rotate(40 100 100)"><g fill="currentColor"><rect x="96.5" y="-20" width="7" height="86" rx="3"/><rect x="92" y="66" width="16" height="8" rx="3"/><rect x="94" y="76" width="12" height="5" rx="2"/><path d="M100 81 L107 96 L100 140 L93 96 Z"/><path d="M107 71 q9 3 9 13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M112 83 l8 0 l2 12 l-12 0 Z"/></g></g><g transform="translate(62,64) scale(0.95,0.95)" fill="none" stroke="currentColor" stroke-width="5.26" stroke-linecap="round"><path d="M-28 8 L28 8 M-20 8 A10 10 0 0 1 -5 -4 A12 12 0 0 1 18 -2 A9 9 0 0 1 26 8"/><path d="M-5 -4 a6 6 0 1 1 8 6"/></g><path fill="currentColor" transform="translate(58,152) scale(0.75)" d="M0 -12 C5 -5 8 -1 8 3 A8 8 0 0 1 -8 3 C-8 -1 -5 -5 0 -12 Z"/><path d="M10 174 Q30 162 50 174 T90 174 T130 174 T170 174 T210 174" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></g><circle cx="100" cy="100" r="92" fill="none" stroke="currentColor" stroke-width="10"/></svg><span>Seikatsu</span></a>
+  <nav aria-label="Navigation principale"><ul>
+    <li><a href="#tomes">Les tomes</a></li>
+    <li><a href="#personnages">Personnages</a></li>
+    <li><a href="#lire">Lire</a></li>
+    <li><a href="#soutenir">Soutenir</a></li>
+    <li><a href="#auteur">L'auteur</a></li>
+  </ul></nav>
+</header>
+
+<main id="vitrine">
+  <section class="ouverture" id="accueil" aria-labelledby="titre">
+    <div>
+      <p class="etiquette">Une saga en autoédition</p>
+      <h1 id="titre">Seikatsu</h1>
+      <p class="auteur">Kigon</p>
+      <p class="accroche">2022, sur une Terre alternative, la politique universelle de l’enfant unique pousse à l’abandon d’un grand nombre de jeunes filles. Au pays Soleil, un orphelinat un peu spécial recueille ces miséreuses pour les former à servir une grande cause : assassiner des hommes de pouvoir véreux. Vous suivrez l’histoire de nombreux protagonistes, tous en quête de créer leur monde parfait.</p>
+      <div class="actions">
+        <a class="bouton" href="#tomes">Découvrir les tomes</a>
+        <a class="bouton creux" href="#lire">Lire gratuitement</a>
+      </div>
+    </div>
+    <div class="kanji" aria-hidden="true">生活<svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><clipPath id="k1"><circle cx="100" cy="100" r="88"/></clipPath></defs><g clip-path="url(#k1)"><g transform="rotate(40 100 100)"><g fill="currentColor"><rect x="96.5" y="-20" width="7" height="86" rx="3"/><rect x="92" y="66" width="16" height="8" rx="3"/><rect x="94" y="76" width="12" height="5" rx="2"/><path d="M100 81 L107 96 L100 140 L93 96 Z"/><path d="M107 71 q9 3 9 13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M112 83 l8 0 l2 12 l-12 0 Z"/></g></g><g transform="translate(62,64) scale(0.95,0.95)" fill="none" stroke="currentColor" stroke-width="5.26" stroke-linecap="round"><path d="M-28 8 L28 8 M-20 8 A10 10 0 0 1 -5 -4 A12 12 0 0 1 18 -2 A9 9 0 0 1 26 8"/><path d="M-5 -4 a6 6 0 1 1 8 6"/></g><path fill="currentColor" transform="translate(58,152) scale(0.75)" d="M0 -12 C5 -5 8 -1 8 3 A8 8 0 0 1 -8 3 C-8 -1 -5 -5 0 -12 Z"/><path d="M10 174 Q30 162 50 174 T90 174 T130 174 T170 174 T210 174" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></g><circle cx="100" cy="100" r="92" fill="none" stroke="currentColor" stroke-width="10"/></svg></div>
+  </section>
+
+
+  <section id="tomes" aria-labelledby="t-tomes">
+    <p class="etiquette">Les trois premiers tomes</p>
+    <h2 id="t-tomes">Les tomes</h2>
+    <div class="tomes">
+      <article class="tome">
+        <span class="num">1</span>
+        <h3>Tome 1 · Serment</h3>
+        <p>Kyoko vient d’obtenir son diplôme d’Assassine après huit années d’études dans le mystérieux orphelinat Izanami. En tant que major de promo, elle se voit confier une cible prestigieuse, Amancio Gates, un néo-milliardaire douteux. La jeune Assassine va découvrir que travailler en équipe avec les autres classes de l’école n’est pas de tout repos…</p>
+        <div class="meta"><span>Chapitres 1 à 10</span><span>ISBN 978-2-487090-00-2</span></div>
+      </article>
+      <article class="tome">
+        <span class="num">2</span>
+        <h3>Tome 2 · Oraison</h3>
+        <p>Après la première mission de Kyoko, plus rien n'est simple à l'orphelinat. Les Reines Mères préparent une mission spéciale, un jeune agent du recensement vient poser des questions, et à Hayao, un match de dignepied va marquer tout le pays.</p>
+        <p class="exergue">Un proche qui part pour son voyage inconnu représente une peine personnelle sans pareil.<br>L’affection infinie qu’on lui porte justifie une douleur atroce et le caractère incomparable de ce sentiment.<br>Pourquoi, sous le couvert de la distance, d’une culture, d’un drapeau ou d’une langue, certaines morts sont-elles plus signifiantes que d’autres ?<br>Il existe des problèmes relatifs aux aisés, relatifs à la misère du monde.</p>
+        <div class="meta"><span>Chapitres 11 à 17</span><span>ISBN 978-2-487090-01-9</span></div>
+      </article>
+      <article class="tome">
+        <span class="num">3</span>
+        <h3>Tome 3 · Yeuse</h3>
+        <p>Une poignée de troisième année pense savoir ce que cachent les Reines Mères. Isolées une semaine pour préparer la mission la plus importante de l'histoire de l'école, elles vont devoir choisir à qui faire confiance.</p>
+        <div class="meta"><span>Chapitres 18 à 33</span><span>ISBN 978-2-487090-02-6</span></div>
+      </article>
+    </div>
+  </section>
+
+  <div class="bloc-classes" id="personnages">
+  <div class="perso-tete"><p class="etiquette">Les personnages</p><p>Choisissez une classe pour voir ses personnages.</p></div>
+  <ul class="classes" id="classes" aria-label="Les classes de l'école : cliquez pour voir les personnages"></ul>
+  <div class="fiches" id="fiches" hidden></div>
+  </div>
+
+  <section id="lire" aria-labelledby="t-lire">
+    <p class="etiquette">Lecture libre</p>
+    <h2 id="t-lire">Lire Seikatsu</h2>
+    <p>Les trois premiers tomes sont là, gratuits en numérique. La suite arrivera au fil de l'écriture.</p>
+    <dl class="formats">
+      <div><dt>En ligne</dt><dd>Chapitre par chapitre, ici même, sur ordinateur ou téléphone.</dd><dd><a class="bouton" href="lire/">Commencer la lecture</a></dd></div>
+      <div><dt>Livre numérique</dt><dd>Fichiers EPUB pour liseuse, téléphone ou tablette.</dd><dd class="epubs"><a href="livres/Seikatsu-Tome1-Serment.epub" download>Tome 1 · Serment</a><a href="livres/Seikatsu-Tome2-Oraison.epub" download>Tome 2 · Oraison</a><a href="livres/Seikatsu-Tome3-Yeuse.epub" download>Tome 3 · Yeuse</a></dd></div>
+      <div><dt>Livre papier <span class="statut">À venir</span></dt><dd>Imprimé près de chez moi et envoyé chez vous.</dd></div>
+    </dl>
+    <p class="licence">Seikatsu est publié sous licence Creative Commons BY-NC-SA 4.0 : vous pouvez lire, partager et créer à partir de l'univers, à condition de me citer (Kigon), de ne pas en faire commerce et de partager vos créations sous la même licence.</p>
+  </section>
+
+  <section id="soutenir" aria-labelledby="t-soutenir">
+    <p class="etiquette">Soutenir</p>
+    <h2 id="t-soutenir">Garder les livres gratuits</h2>
+    <p>Seikatsu restera gratuit pour tout le monde. Si vous voulez m'aider à financer l'impression, les prochains tomes et les bonus, vous pouvez m'offrir un café : chaque don compte.</p>
+    <div class="actions"><a class="bouton" href="https://ko-fi.com/kigon" target="_blank" rel="noopener">M'offrir un café sur Ko-fi</a></div>
+  </section>
+
+  <section id="auteur" aria-labelledby="t-auteur">
+    <p class="etiquette">L'auteur</p>
+    <h2 id="t-auteur">Kigon</h2>
+    <p>J'écris Seikatsu en autoédition, et je veux que ces livres soient accessibles à tous. Une question, une faute repérée, une idée ? Écrivez-moi :</p>
+    <div class="contact"><code id="adresse">contact@kigon.fr</code><button class="petit-bouton" type="button" id="copier">Copier l'adresse</button><span id="copie-ok" class="reponse" role="status"></span></div>
+  </section>
+</main>
+
+
+<footer>
+  <span>© Kigon · Seikatsu, licence CC BY-NC-SA 4.0</span>
+  <a href="/mentions-legales/">Mentions légales</a>
+</footer>
+</div>
+
+<script>
+// Âges : calculés à partir de l'année de naissance. À chaque nouveau tome, mettre à jour EPOQUE.
+const EPOQUE = { annee: 2022, libelle: 'à l’époque des tomes 1 à 3 (hiver 2022-2023)' };
+// [nom, rôle, tome de première apparition, description, reine, années de naissance, âge approximatif]
+const CLASSES = [
+ ['Assassines','Elles éliminent les cibles désignées par l’école.',[
+  ['Kiku','Reine Mère Assassine',1,'La plus jeune des Reines Mères. Elle a recueilli plusieurs de ses élèves, dont Kyoko et Moann.',1,[1972],0,{"2": "Elle a ramené Moann à l’école vers 9 ans, déguisée en inspecteur et accompagnée d’une vingtaine d’Opératrices. Pour elle, « Moann est invincible »."}],
+  ['Kyoko','Diplômée en 2022',1,'Major de promo, rigoureuse et entièrement dévouée à la cause, elle reçoit Amancio Gates comme première cible. Marraine de Moann. Elle a peur des chats, et c’est un secret.',0,[2004],0,{"1": "Avec Elsa, elle a inventé le poison « Discrétion », qui leur a valu le prix de l’invention. Elle meurt le 07/01/2023 dans sa chambre, empoisonnée par son propre poison, au téléphone avec Elsa. Ses dernières volontés : rejoindre la nouvelle école, ne rien dire aux Reines Mères, prendre soin de Moann, « rêve mieux ». Dans ses derniers mots, elle confie enfin d’où vient sa peur des chats : petite, elle vivait dans la rue, dans un carton, entourée de chats qui la fixaient de leurs yeux perçants. Elle leur disputait la nourriture, se faisait griffer, et les voyait comme des petits démons.", "2": "Ses obsèques ont lieu au pied du grand arbre. Moann dépose un papier entre ses mains.", "3": "Sa marraine était Anna."}],
+  ['Elsa','Diplômée en 2022',1,'Meilleure amie de Kyoko. Toujours une blague à la bouche.',0,[2004],0,{"1": "Avec Kyoko, elle a inventé le poison « Discrétion », qui leur a valu le prix de l’invention. Elle est au téléphone avec elle quand elle meurt et reçoit ses dernières volontés.", "2": "Pour tenir sa promesse à Kyoko, elle essaie de se rapprocher de Moann et vient s’entraîner avec elle tous les dimanches. C’est Kyoko qui, dans ses derniers mots, lui a révélé l’existence de la nouvelle école et lui a fait promettre d’y emmener Moann. Elle attend le bon moment pour lui en parler.", "3": "Elle révèle à Moann la vérité sur la mort d’Estelle et les enregistrements trafiqués. Choisie pour la mission spéciale, elle survit au piège du hangar, blessée à la cuisse."}],
+  ['Moann','Novice en dernière année d’étude',1,'Filleule de Kyoko. Arrivée tard à l’orphelinat, elle connaît mieux le monde extérieur que ses sœurs et rêve d’« apporter de la lumière sur les gens ».',0,[2005],0,{"1": "Kyoko l’a choisie comme filleule et Moann l’appelle « grande sœur ». La nuit, quand ses crises d’angoisse la réveillent, c’est chez elle qu’elle court : il n’y a qu’avec Kyoko qu’elle se calme. Entre deux parties de janken, Kyoko lui transmet son idéal, « apporter de la lumière sur les gens », et Moann en fait aussitôt le sien.", "2": "Son passé : seule à 5 ans dans les rues de Shimabara, exploitée quatre ans par un clan qui en fait « la petite fille fantôme », récupérée par Kiku vers 9 ans. Après la mort de Kyoko, elle se ferme et ne vit plus que pour la cause. On la dit l’Assassine la plus talentueuse de l’histoire de l’école.", "3": "Choisie pour la mission spéciale, elle découvre au hangar la trahison des Reines Mères, se bat contre les Élites pour protéger ses sœurs et est grièvement touchée à la poitrine."}],
+  ['Linda','Troisième année',3,'Assassine de la promotion de Lise. Franche, elle ne recule jamais devant une provocation.',0,[2001],0,{"3": "Elle était sur le terrain lors de la mission d’Estelle. Au hangar, elle tue une Élite avant d’être abattue."}],
+  ['Anna','Inventrice',3,'Jumelle d’Eve et ancienne marraine de Kyoko. Les deux sœurs finissent les phrases l’une de l’autre. Elles comptent bien révolutionner l’école avec leurs inventions et remportent au moins un prix par an au concours d’invention.',0,[2003],0,{"3": "Avec Eve, elle a passé cinq ans à créer des combinaisons qui décuplent les sens."}],
+  ['Ziva','Assassine Élite',3,'Chargée de l’entraînement physique de l’équipe spéciale.',0,[1992]]]],
+ ['Opératrices','Comédiennes, elles approchent les cibles et créent les diversions.',[
+  ['Akemi','Reine Mère Opératrice',1,'Diction impeccable, elle appelle ses élèves « mes petites perles ».',1,[1967],0,{"1": "Elle mène l’entretien de Tania après la mission sur Amancio (rapport n° 2055).", "2": "Elle reçoit les agents du recensement."}],
+  ['Tania','Diplômée en 2022',1,'Bavarde, comédienne et joueuse de shamisen, elle s’agenouille pour s’excuser. Opératrice de l’équipe de Kyoko.',0,[2004],0,{"1": "Avec Kyoko, elle joue l’escort pour approcher Amancio, puis raconte la mission à Akemi.", "2": "Après la mort de Kyoko, elle se rapproche de Saïka au garage.", "3": "Choisie pour la mission spéciale, elle survit au piège du hangar."}],
+  ['Estelle','Promotion de Lise',1,'Son nom revient souvent dans la bouche des troisième année.',0,[2001],2,{"1": "Elle est morte pendant une mission, avant le début de l’histoire.", "3": "Morte début 2020, après une mission où une Financière de son équipe a péri. L’enregistrement de son entretien avait été trafiqué : cette découverte de Greta a fait naître la nouvelle école."}],
+  ['Eve','Inventrice',3,'Jumelle d’Anna et marraine de Tania. Les deux sœurs finissent les phrases l’une de l’autre. Elles comptent bien révolutionner l’école avec leurs inventions et remportent au moins un prix par an au concours d’invention.',0,[2003],0,{"3": "Avec Anna, elle a passé cinq ans à créer des combinaisons qui décuplent les sens."}],
+  ['Wanda, Justine et Kim','Opératrices en formation',2,'Trois Opératrices interrogées par l’agent Whitman lors de sa visite de l’orphelinat.',0,[2004,2006,2007]],
+  ['Maria','Recrue',2,'Première sélectionnée pour commencer la formation d’Opératrice l’année suivante. Elle impressionne l’agent du recensement par sa maturité.',0,[2013]]]],
+ ['Informatrices','Elles enquêtent et filent les cibles avant chaque mission.',[
+  ['Egao','Reine Mère Informatrice',1,'Elle place une Informatrice sur chaque cible à surveiller. C’est elle qui a recueilli Lise.',1,[1968],0,{"1": "Après la mort de Kyoko, elle rappelle Lise à l’école et la fait venir dans son bureau.", "2": "Ses Informatrices surveillent de près Amancio et les autres membres du comité."}],
+  ['Lise','Troisième année',1,'Chargée d’accompagner l’équipe de Kyoko pour sa première mission. Elle parle volontiers franglais.',0,[2001],0,{"1": "Elle révèle à l’équipe de Kyoko le secret des Reines Mères et fait partie des six fondatrices de la nouvelle école.", "2": "Rappelée par Egao, elle meurt peu après. Cause du décès : suicide.", "3": "Une Élite affirme qu’elle n’est pas morte."}]]],
+ ['Informaticiennes','Réseaux, logiciels, piratage : la technique de l’école.',[
+  ['Risae','Reine Mère Informaticienne',2,'Jumelle de Lei. Sarcastique et piquante, elle n’aime pas qu’on traite ses élèves de « geeks ».',1,[1969],0,{"2": "Ses Informaticiennes ont intercepté des enregistrements de la réunion du comité grâce à une faille de son réseau."}],
+  ['Greta','Troisième année',3,'Deux fois lauréate du concours d’invention : pour le réseau social de l’école, puis pour la puce-mouchard des Informatrices. Elle travaille depuis trois ans avec Rhode sur un logiciel de traduction instantanée.',0,[2001],0,{"3": "C’est elle qui a prouvé que l’enregistrement d’Estelle était trafiqué. Elle est tuée au hangar."}]]],
+ ['Conductrices','Elles fabriquent, entretiennent et pilotent les véhicules de l’école.',[
+  ['Lei','Reine Mère Conductrice',2,'Jumelle de Risae. Elle parle peu et sourit, détachée.',1,[1969]],
+  ['Saïka','Diplômée en 2022, seule de sa promotion',1,'Sèche et cynique, elle surnomme Tania « le plot » et ne fait aucune confiance aux Opératrices.',0,[2004],0,{"1": "Sa sœur de sang a été tuée en mission par la faute d’une Opératrice, d’où sa méfiance. Cagoulée, katana en main, elle simule l’enlèvement de Kyoko et Tania pour les tirer du restaurant.", "3": "Elle survit au piège du hangar, blessée à l’épaule."}],
+  ['Ming','Troisième année',3,'Conductrice de la promotion de Lise.',0,[2001],0,{"3": "Pilote de la mission spéciale. Son sort reste inconnu à la fin du tome 3."}],
+  ['Julie','Cinquième année',2,'Passionnée de mécanique depuis l’enfance. C’est elle qui ramène l’agent Whitman en ville.',0,[2007]]]],
+ ['Forgeronnes','Elles forgent les armes de l’école, jour et nuit.',[
+  ['Tomoe','Reine Mère Forgeronne',2,'L’aînée des Reines Mères. Tablier de cuir, mains dans le dos, elle fait tourner la forge vingt-quatre heures sur vingt-quatre.',1,[1966],0,{"2": "Elle forge les armes non traçables commandées par Yume, en acier acheté hors de l’école."}],
+  ['Raakel','Troisième année',3,'Forgeronne de la promotion de Lise, à qui rien n’échappe dans la forge.',0,[2001],0,{"3": "Elle découvre de l’acier étranger sous un four de la forge. Elle est tuée au hangar."}]]],
+ ['Traductrices','Toutes les langues du monde, et les contacts avec l’extérieur.',[
+  ['Yume','Reine Mère Traductrice',1,'Reine Mère Suprême depuis 2020, tirée au sort pour trois ans. Diplomate, elle gère les contacts de l’école avec le monde extérieur.',1,[1971],0,{"2": "Elle commande des armes non traçables et écoute en secret les entretiens du recensement.", "3": "Elle annonce la mission spéciale et les filles choisies pour y participer."}],
+  ['Rhode','Troisième année',3,'Elle maîtrise à la perfection les cinq langues majeures de la planète.',0,[2001],0,{"3": "Elle apprend en une semaine la langue codée de l’ennemi. Elle est tuée au hangar."}],
+  ['Soaz','Linguiste en formation',2,'Orientée en traduction à 10 ans. Interrogée par l’agent Whitman lors de sa visite.',0,[2009]]]],
+ ['Financières','Elles gèrent l’argent de l’école.',[
+  ['Rumie','Reine Mère Financière',2,'Passionnée de jeux de stratégie, échecs et gungi en tête.',1,[1970]],
+  ['Cécile','Troisième année',3,'Grande et brune, de la promotion de Lise. Elle adore le jus de tomate.',0,[2001]]]],
+ ['Sœurs Soutiens','Elles font tourner l’école : accueil, soins, entretien, logistique.',[
+  ['Luce','Sœur Soutien',2,'De garde à la guérite du portail le jour de la visite du recensement.',0,null],
+  ['Clémentine','Sœur Soutien',2,'Chargée d’accompagner l’agent Whitman, parapluie en main.',0,null,0,{"2": "Pour avoir hésité devant l’agent, elle est destituée par Akemi : cuisine et ménage jusqu’à nouvel ordre."}],
+  ['Naly','Sœur Soutien',2,'Elle a manqué de peu son diplôme d’Opératrice.',0,[2004]]]],
+ ['Hors de l’école','Celles et ceux que l’on croise hors des murs de l’orphelinat.',[
+  ['Amancio Gates','Néo-milliardaire',1,'Fortune bâtie dans l’industrie textile. Il vit avec sa famille dans une grande propriété de Shigeru et contrôle tout, même ses émotions.',0,[1983],0,{"1": "Il assiste à la réunion du comité du 06/01/2023.", "2": "Il a survécu à la tentative d’assassinat et se montre désormais très prudent."}],
+  ['Britney et Lola Gates','Sa femme et sa fille',1,'La femme et la fille d’Amancio.',0,[1992,2015]],
+  ['Paco Chivo','Chauffeur',1,'Chauffeur d’Amancio depuis cinq ans, le seul de son entourage à le tutoyer.',0,null],
+  ['Mahima « Maya » Chivo','Femme de Paco',1,'Devenue la secrétaire de direction d’Amancio.',0,null],
+  ['Virginie','Gouvernante',1,'Gouvernante de la maison Gates, charmante avec Madame et glaciale avec Monsieur.',0,null],
+  ['Jesse Whitman','Agent du recensement en formation',2,'Carriériste, il rêve de gravir les échelons jusqu’à la communauté internationale.',0,[1997],0,{"3": "Il réussit son examen. Sa thèse, inspirée de l’orphelinat Izanami, sera présentée au ministère."}],
+  ['Walter Jackson','Agent du recensement',2,'Le mentor de Jesse. Agent depuis vingt ans après une jeunesse passée dans la rue.',0,[1972],1],
+  ['Mark Meyers','Homme d’affaires',2,'Homme d’affaires célèbre du pays Soleil, connu pour mettre sa fortune au service de causes que d’autres jugent perdues.',0,[1972],1,{"2": "Pendant l’attentat du stade, il porte secours aux blessés aux côtés de Léo.", "3": "Il reçoit la plus haute distinction du pays et propose à Léo de financer des soins dans les bidonvilles."}],
+  ['Léo Hughes','Médecin',2,'Jeune médecin de l’équipe de dignepied des Tanukis de Shigeru.',0,[1999],0,{"2": "Il soigne les blessés lors de l’attentat du stade de Hayao.", "3": "Il refuse la médaille individuelle. Il élève trois filles, toutes originaires du même bidonville que lui, et distribue des repas chaque week-end."}],
+  ['Charlie, Clara et Callie Hughes','Les filles de Léo',3,'Charlie est la « capitaine », Clara a du caractère et Callie parle à sa façon.',0,[2012,2014,2017],0,{"3": "Seule Charlie est adoptée légalement. Clara et Callie vivent cachées, avec de faux papiers."}]]]
+];
+function ageTexte(naiss, approx){
+  if (!naiss || approx === 2) return '';
+  if (approx) return 'La cinquantaine';
+  const ages = naiss.map(n => EPOQUE.annee - n);
+  if (ages.length === 1) return ages[0] + ' ans';
+  return ages.slice(0, -1).join(', ') + ' et ' + ages[ages.length - 1] + ' ans';
+}
+const HOMMES = ['Amancio Gates','Paco Chivo','Jesse Whitman','Walter Jackson','Mark Meyers','Léo Hughes'];
+function naissTexte(naiss, approx, nom){
+  if (!naiss || approx === 1) return '';
+  const e = HOMMES.includes(nom) ? 'é' : 'ée';
+  return (naiss.length === 1 ? 'N' + e + ' en ' : 'N' + e + 's en ') + (naiss.length === 1 ? naiss[0] : naiss.slice(0, -1).join(', ') + ' et ' + naiss[naiss.length - 1]);
+}
+
+(function(){
+  const ul = document.getElementById('classes'), zone = document.getElementById('fiches');
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  let tomeLu = 0;
+  function fiche([n, q, t, d, reine, naiss, approx, spoils], N){
+    const a = ageTexte(naiss, approx), nt = naissTexte(naiss, approx, n);
+    const faits = Object.keys(spoils || {}).map(Number).filter(k => k <= N).sort().map(k => '<p><b>Tome ' + k + '.</b> ' + esc(spoils[k]) + '</p>');
+    return '<article class="fiche' + (reine ? ' reine' : '') + '"><p class="qui">' + esc(q) + '</p><h3>' + esc(n) + '</h3>' +
+      (a || nt ? '<p class="age">' + esc(a) + (nt ? ' <span>' + (a ? '· ' : '') + esc(nt) + '</span>' : '') + '</p>' : '') +
+      '<p>' + esc(d) + '</p><p class="tomeb">Première apparition : tome ' + t + '</p>' +
+      (faits.length ? '<details class="revel"><summary>Ce que l’on sait à la fin du tome ' + N + ' <strong class="alerte">Attention au spoil !</strong></summary><div class="spoil-texte">' + faits.join('') + '</div></details>' : '') + '</article>';
+  }
+  function afficher(nom, role, persos){
+    const choix = [1,2,3].map(k => '<button type="button" class="pastille" data-tome="' + k + '" aria-pressed="' + (k === tomeLu) + '" aria-label="J’ai fini le tome ' + k + '">' + k + '</button>').join('');
+    let corps;
+    if (!tomeLu) corps = '';
+    else {
+      const visibles = persos.filter(p => p[2] <= tomeLu);
+      corps = visibles.length ? '<div class="grille">' + visibles.map(p => fiche(p, tomeLu)).join('') + '</div>' : '<p class="vide">Aucun personnage de cette classe n’apparaît avant la fin du tome ' + tomeLu + '.</p>';
+    }
+    zone.innerHTML = '<div class="entete"><h2>' + esc(nom) + '</h2><button class="fermer" type="button">Fermer</button></div><p class="role-classe">' + esc(role) + '</p>' +
+      '<div class="spoil"><p class="spoil-tete"><strong class="alerte">Attention au spoil !</strong> <span class="consigne">Ne choisissez un numéro qu’après avoir fini le tome en question pour afficher les fiches personnages.</span></p><div class="pastilles">' + choix + '</div></div>' +
+      corps + (tomeLu ? '<p class="note">Âges ' + EPOQUE.libelle + '.</p>' : '');
+    zone.querySelectorAll('.pastille').forEach(p => p.addEventListener('click', () => {
+      tomeLu = +p.dataset.tome === tomeLu ? 0 : +p.dataset.tome;
+      afficher(nom, role, persos);
+    }));
+    zone.querySelector('.fermer').addEventListener('click', () => { zone.hidden = true; ul.querySelectorAll('button').forEach(x => x.setAttribute('aria-expanded','false')); });
+    zone.hidden = false;
+  }
+  CLASSES.forEach(([nom, role, persos]) => {
+    const li = document.createElement('li'), b = document.createElement('button');
+    b.type = 'button'; b.textContent = nom; b.setAttribute('aria-expanded','false'); b.setAttribute('aria-controls','fiches');
+    b.addEventListener('click', () => {
+      const ouvert = b.getAttribute('aria-expanded') === 'true';
+      ul.querySelectorAll('button').forEach(x => x.setAttribute('aria-expanded','false'));
+      if (ouvert) { zone.hidden = true; return; }
+      b.setAttribute('aria-expanded','true');
+      tomeLu = 0;
+      afficher(nom, role, persos);
+    });
+    li.append(b); ul.append(li);
+  });
+})();
+// Les Archives d'Izanami ont leur propre page : kigon.fr/archives/
+if (location.hash === '#archives') location.replace('archives/');
+document.getElementById('copier').addEventListener('click', async () => {
+  const ok = document.getElementById('copie-ok');
+  try{ await navigator.clipboard.writeText('contact@kigon.fr'); ok.textContent = 'Adresse copiée.'; }
+  catch(e){ const r = document.createRange(); r.selectNodeContents(document.getElementById('adresse')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); ok.textContent = 'Adresse sélectionnée, copiez-la.'; }
+});
+</script>
+
+</body>
+</html>

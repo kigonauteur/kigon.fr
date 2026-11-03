@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /archives/
+Sitemap: https://kigon.fr/sitemap.xml
